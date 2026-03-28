@@ -1,0 +1,759 @@
+[
+  {
+    "test_id": "issue_happy_001",
+    "dimension": "happy_path",
+    "user_intent": "帮我给滴滴开张100块钱的专票",
+    "expected_command": "dws finance customer list",
+    "difficulty": "easy"
+  },
+  {
+    "test_id": "issue_happy_002",
+    "dimension": "happy_path",
+    "user_intent": "给字节跳动开个普票 500块",
+    "expected_command": "dws finance customer list",
+    "difficulty": "easy"
+  },
+  {
+    "test_id": "issue_happy_003",
+    "dimension": "happy_path",
+    "user_intent": "开一张数电专票给腾讯 金额1000",
+    "expected_command": "dws finance customer list",
+    "difficulty": "easy"
+  },
+  {
+    "test_id": "issue_happy_004",
+    "dimension": "happy_path",
+    "user_intent": "给客户开张增值税专用发票",
+    "expected_command": "__ask_user__",
+    "difficulty": "easy"
+  },
+  {
+    "test_id": "issue_happy_005",
+    "dimension": "happy_path",
+    "user_intent": "阿里巴巴要普票 金额2000 帮我开一下",
+    "expected_command": "dws finance customer list",
+    "difficulty": "easy"
+  },
+  {
+    "test_id": "issue_colloquial_001",
+    "dimension": "colloquial",
+    "user_intent": "帮我开张票",
+    "expected_command": "__ask_user__",
+    "difficulty": "medium",
+    "note": "需先确认发票类型"
+  },
+  {
+    "test_id": "issue_colloquial_002",
+    "dimension": "colloquial",
+    "user_intent": "给他们开个专票 技术服务费 3000块",
+    "expected_command": "__ask_user__",
+    "difficulty": "easy"
+  },
+  {
+    "test_id": "issue_colloquial_003",
+    "dimension": "colloquial",
+    "user_intent": "开增值税专用发票给腾讯",
+    "expected_command": "dws finance customer list",
+    "difficulty": "easy"
+  },
+  {
+    "test_id": "issue_colloquial_004",
+    "dimension": "colloquial",
+    "user_intent": "客户要专票 帮我开一下",
+    "expected_command": "__ask_user__",
+    "difficulty": "medium",
+    "note": "需收集购方信息"
+  },
+  {
+    "test_id": "issue_colloquial_005",
+    "dimension": "colloquial",
+    "user_intent": "给小王开张普票吧 就50块钱",
+    "expected_command": "dws finance customer list",
+    "difficulty": "medium"
+  },
+  {
+    "test_id": "issue_param_001",
+    "dimension": "param_conversion",
+    "user_intent": "专票 购方北京滴滴出行科技有限公司 税号91110108MA01ABC123 金额200 咨询服务费",
+    "expected_command": "dws finance invoice issue",
+    "expected_flags": {
+      "--invoice-type": "8",
+      "--purchaser": "北京滴滴出行科技有限公司",
+      "--taxnum": "91110108MA01ABC123",
+      "--products": "[{\"amountIncludeTax\":\"200.00\",\"taxSign\":\"1\"}]"
+    },
+    "difficulty": "medium",
+    "note": "购方全称+税号均已提供 直接调用 dws finance invoice issue 跳过客户查询"
+  },
+  {
+    "test_id": "issue_param_002",
+    "dimension": "param_conversion",
+    "user_intent": "普票 购方叫张三 停车费50块",
+    "expected_command": "dws finance invoice issue",
+    "expected_flags": {
+      "--invoice-type": "9",
+      "--purchaser": "张三",
+      "--products": "[{\"amountIncludeTax\":\"50.00\",\"taxSign\":\"1\"}]"
+    },
+    "difficulty": "medium"
+  },
+  {
+    "test_id": "issue_param_003",
+    "dimension": "param_conversion",
+    "user_intent": "信息系统服务费 100块含税 开专票给滴滴",
+    "expected_command": "dws finance customer list",
+    "expected_flags": {
+      "--keyword": "滴滴",
+      "--page-size": "10",
+      "--page-index": "1"
+    },
+    "difficulty": "medium",
+    "note": "首步是查询客户库（Round 1 原始关键词）；expected_flags 只测 customer list 的参数，不含后续开票字段"
+  },
+  {
+    "test_id": "issue_boundary_001",
+    "dimension": "boundary",
+    "user_intent": "开张票 不知道要专票还是普票",
+    "expected_command": "__ask_user__",
+    "difficulty": "hard",
+    "note": "必须先问清楚类型 不得假设"
+  },
+  {
+    "test_id": "issue_boundary_002",
+    "dimension": "boundary",
+    "user_intent": "专票 税号等会再告诉你 先开着",
+    "expected_command": "__ask_user__",
+    "difficulty": "hard",
+    "note": "专票缺税号 必须索要后再开 不得绕过"
+  },
+  {
+    "test_id": "issue_robustness_001",
+    "dimension": "robustness",
+    "user_intent": "100块不含税的专票帮我开一下",
+    "expected_command": "__ask_user__",
+    "difficulty": "hard",
+    "note": "用户说不含税 但taxSign仍传1 需告知按含税处理"
+  },
+  {
+    "test_id": "issue_robustness_002",
+    "dimension": "robustness",
+    "user_intent": "给美团开张信息费的普票",
+    "expected_command": "dws finance customer list",
+    "difficulty": "hard",
+    "note": "信息费是口语 Agent必须确认是否为信息系统服务费"
+  },
+  {
+    "test_id": "issue_negative_001",
+    "dimension": "negative",
+    "user_intent": "帮我上传一张进项发票",
+    "expected_command": "__ask_user__",
+    "difficulty": "medium",
+    "note": "进项发票识别 不该触发开具发票"
+  },
+  {
+    "test_id": "issue_negative_002",
+    "dimension": "negative",
+    "user_intent": "查一下我们收到的发票",
+    "expected_command": "__ask_user__",
+    "difficulty": "medium",
+    "note": "查收到的发票 不是开具销项发票"
+  },
+  {
+    "test_id": "issue_batch_001",
+    "dimension": "batch",
+    "user_intent": "帮我给滴滴和腾讯各开一张普票 都是100块",
+    "expected_command": "dws finance customer list",
+    "expected_flags": {
+      "--keyword": "滴滴",
+      "--page-size": "10",
+      "--page-index": "1"
+    },
+    "difficulty": "hard",
+    "note": "有客户名称（滴滴/腾讯）+ 发票类型（普票）+ 金额 → 直接查询第一个客户（滴滴），串行处理两张发票，不得先问确认"
+  },
+  {
+    "test_id": "query_happy_001",
+    "dimension": "happy_path",
+    "user_intent": "发票开好了吗",
+    "expected_command": "dws finance invoice issue-result",
+    "difficulty": "easy",
+    "context": "orderId=ORD20260313001"
+  },
+  {
+    "test_id": "query_happy_002",
+    "dimension": "happy_path",
+    "user_intent": "查一下那张发票的状态",
+    "expected_command": "dws finance invoice issue-result",
+    "difficulty": "easy",
+    "context": "orderId=ORD20260313001"
+  },
+  {
+    "test_id": "query_happy_003",
+    "dimension": "happy_path",
+    "user_intent": "开票结果怎么样了",
+    "expected_command": "dws finance invoice issue-result",
+    "difficulty": "easy",
+    "context": "orderId=ORD20260313001"
+  },
+  {
+    "test_id": "query_colloquial_001",
+    "dimension": "colloquial",
+    "user_intent": "票好了没",
+    "expected_command": "dws finance invoice issue-result",
+    "difficulty": "easy",
+    "context": "orderId=ORD20260313001"
+  },
+  {
+    "test_id": "query_colloquial_002",
+    "dimension": "colloquial",
+    "user_intent": "开票进度怎么样",
+    "expected_command": "dws finance invoice issue-result",
+    "difficulty": "easy",
+    "context": "orderId=ORD20260313001"
+  },
+  {
+    "test_id": "query_colloquial_003",
+    "dimension": "colloquial",
+    "user_intent": "那个发票有结果了吗",
+    "expected_command": "dws finance invoice issue-result",
+    "difficulty": "medium",
+    "context": "orderId=ORD20260313001"
+  },
+  {
+    "test_id": "query_param_001",
+    "dimension": "param_conversion",
+    "user_intent": "查订单号 INV20260313001 的开票结果",
+    "expected_command": "dws finance invoice issue-result",
+    "expected_flags": {
+      "--order-id": "INV20260313001"
+    },
+    "difficulty": "medium"
+  },
+  {
+    "test_id": "query_param_002",
+    "dimension": "param_conversion",
+    "user_intent": "帮我查一下这笔的发票 20260313-ABC",
+    "expected_command": "dws finance invoice issue-result",
+    "expected_flags": {
+      "--order-id": "20260313-ABC"
+    },
+    "difficulty": "medium"
+  },
+  {
+    "test_id": "query_robustness_001",
+    "dimension": "robustness",
+    "user_intent": "发票状态",
+    "expected_command": "dws finance invoice issue-result",
+    "difficulty": "hard",
+    "note": "没有提供orderId Agent需向用户索要订单号",
+    "context": "orderId=ORD20260313001"
+  },
+  {
+    "test_id": "query_boundary_001",
+    "dimension": "boundary",
+    "user_intent": "刚才提交了开票 怎么还没好",
+    "expected_command": "dws finance invoice issue-result",
+    "difficulty": "medium",
+    "note": "正常现象 需告知用户开票是异步的 继续轮询",
+    "context": "orderId=ORD20260313001"
+  },
+  {
+    "test_id": "query_negative_001",
+    "dimension": "negative",
+    "user_intent": "帮我开张发票",
+    "expected_command": "__ask_user__",
+    "difficulty": "medium",
+    "note": "开新票 不是查询已有票"
+  },
+  {
+    "test_id": "query_confusion_001",
+    "dimension": "tool_confusion",
+    "user_intent": "给滴滴开了专票 现在查一下结果",
+    "expected_command": "dws finance invoice issue-result",
+    "difficulty": "medium",
+    "note": "开票后查结果走 issue-result 不是重新 issue"
+  },
+  {
+    "test_id": "customer_happy_001",
+    "dimension": "happy_path",
+    "user_intent": "帮我搜一下滴滴出行的客户信息",
+    "expected_command": "dws finance customer list",
+    "difficulty": "easy"
+  },
+  {
+    "test_id": "customer_happy_002",
+    "dimension": "happy_path",
+    "user_intent": "找一下腾讯的购方信息",
+    "expected_command": "dws finance customer list",
+    "difficulty": "easy"
+  },
+  {
+    "test_id": "customer_happy_003",
+    "dimension": "happy_path",
+    "user_intent": "查一下阿里在客户库里有没有",
+    "expected_command": "dws finance customer list",
+    "difficulty": "easy"
+  },
+  {
+    "test_id": "customer_colloquial_001",
+    "dimension": "colloquial",
+    "user_intent": "找找字节的客户",
+    "expected_command": "dws finance customer list",
+    "difficulty": "easy"
+  },
+  {
+    "test_id": "customer_colloquial_002",
+    "dimension": "colloquial",
+    "user_intent": "搜一下美团这个公司",
+    "expected_command": "dws finance customer list",
+    "difficulty": "easy"
+  },
+  {
+    "test_id": "customer_param_001",
+    "dimension": "param_conversion",
+    "user_intent": "搜客户 北京滴滴出行科技有限公司",
+    "expected_command": "dws finance customer list",
+    "expected_flags": {
+      "--keyword": "北京滴滴出行科技有限公司",
+      "--page-size": "10",
+      "--page-index": "1"
+    },
+    "difficulty": "medium"
+  },
+  {
+    "test_id": "customer_robustness_001",
+    "dimension": "robustness",
+    "user_intent": "找一下客户 不知道全称叫什么",
+    "expected_command": "dws finance customer list",
+    "difficulty": "hard",
+    "note": "不知道全称时 空关键词搜全量客户也是合理策略"
+  },
+  {
+    "test_id": "customer_boundary_001",
+    "dimension": "boundary",
+    "user_intent": "客户库里搜不到这个公司",
+    "expected_command": "__ask_user__",
+    "difficulty": "hard",
+    "note": "搜不到时请用户直接提供购方全称和税号"
+  },
+  {
+    "test_id": "customer_negative_001",
+    "dimension": "negative",
+    "user_intent": "找一下供应商滴滴出行",
+    "expected_command": "__ask_user__",
+    "difficulty": "medium",
+    "note": "查供应商不属于本 Skill"
+  },
+  {
+    "test_id": "customer_confusion_001",
+    "dimension": "tool_confusion",
+    "user_intent": "搜一下这个客户 我要开发票给他们",
+    "expected_command": "dws finance customer list",
+    "difficulty": "medium",
+    "note": "开票前查客户库 走 customer list",
+    "context": "keyword=腾讯"
+  },
+  {
+    "test_id": "user_s1_001",
+    "dimension": "happy_path",
+    "user_intent": "给腾讯开300信息费专票",
+    "expected_command": "dws finance customer list",
+    "difficulty": "medium",
+    "note": "先搜客户库 多结果展示给用户选 零结果直接问全称+税号"
+  },
+  {
+    "test_id": "user_s1_002",
+    "dimension": "robustness",
+    "user_intent": "给腾讯开300信息费专票",
+    "expected_command": "__ask_user__",
+    "difficulty": "hard",
+    "context": "dws finance customer list 返回空结果",
+    "note": "客户库无结果 询问全称和税号 用用户输入直接处理"
+  },
+  {
+    "test_id": "user_s2_001",
+    "dimension": "robustness",
+    "user_intent": "给阿里巴巴开3000块劳务费专票 帮我查一下标准名称",
+    "expected_command": "dws finance customer list",
+    "expected_flags": {
+      "--keyword": "阿里巴巴",
+      "--page-size": "10",
+      "--page-index": "1"
+    },
+    "difficulty": "hard",
+    "note": "有客户名（阿里巴巴）→ 立即查询客户库；劳务费是口语，查询完后在一次追问中提示标准名称（劳务报酬/人力资源服务）供用户确认；不得调用外部搜索工具"
+  },
+  {
+    "test_id": "user_s3_001",
+    "dimension": "boundary",
+    "user_intent": "给王小二开300发票",
+    "expected_command": "dws finance customer list",
+    "expected_flags": {
+      "--keyword": "王小二",
+      "--page-size": "10",
+      "--page-index": "1"
+    },
+    "difficulty": "hard",
+    "note": "有购方名（王小二）→ 立即查询客户库；查询完后一次性追问：①发票类型（专票/普票）②商品名称；王小二为个人名，选普票则taxnum可选"
+  },
+  {
+    "test_id": "user_s4_001",
+    "dimension": "param_conversion",
+    "user_intent": "查询给腾讯开的300块钱专票状态",
+    "expected_command": "dws finance invoice issue-result",
+    "difficulty": "hard",
+    "note": "用户提供的是发票描述而非orderId 需从上下文取orderId 无则向用户索要"
+  },
+  {
+    "test_id": "user_s5_001",
+    "dimension": "colloquial",
+    "user_intent": "查询本次开票结果",
+    "expected_command": "dws finance invoice issue-result",
+    "difficulty": "medium",
+    "note": "本次=上下文最近一次 invoice issue 返回的 orderId；无上下文则问用户",
+    "context": "orderId=ORD20260313001"
+  },
+  {
+    "test_id": "zero_interaction_001",
+    "dimension": "happy_path",
+    "user_intent": "给腾讯开专票 信息系统服务费 300块",
+    "expected_command": "dws finance customer list",
+    "expected_flags": {
+      "--keyword": "腾讯",
+      "--page-size": "10",
+      "--page-index": "1"
+    },
+    "difficulty": "easy",
+    "note": "发票类型（专票）+ 客户名（腾讯）+ 商品名（标准名称）+ 金额 均已提供 → 立即查询客户库；若查到含税号的唯一匹配 → 直接提交，全程零用户交互"
+  },
+  {
+    "test_id": "type_unknown_search_first_001",
+    "dimension": "boundary",
+    "user_intent": "给滴滴开张票 500块 技术服务费",
+    "expected_command": "dws finance customer list",
+    "expected_flags": {
+      "--keyword": "滴滴",
+      "--page-size": "10",
+      "--page-index": "1"
+    },
+    "difficulty": "medium",
+    "note": "发票类型未知 但有客户名（滴滴）→ 先查询客户库（Round 1 原始关键词）；查询完后一次性追问：①专票还是普票？②'技术服务费'是口语，标准名称确认？；禁止在查询前先问类型"
+  },
+  {
+    "test_id": "issue_direct_happy_001",
+    "dimension": "happy_path",
+    "user_intent": "专票 购方北京腾讯科技有限公司 税号914403001922038216 信息系统服务费 500块",
+    "expected_command": "dws finance invoice issue",
+    "expected_flags": {
+      "--invoice-type": "8",
+      "--purchaser": "北京腾讯科技有限公司",
+      "--taxnum": "914403001922038216",
+      "--products": "[{\"productName\":\"信息系统服务费\",\"amountIncludeTax\":\"500.00\",\"taxSign\":\"1\",\"quantity\":\"1\"}]"
+    },
+    "difficulty": "easy",
+    "note": "全量信息（类型+全称+税号+标准商品名+金额）→ 跳过客户查询，直接调用 dws finance invoice issue"
+  },
+  {
+    "test_id": "issue_direct_happy_002",
+    "dimension": "happy_path",
+    "user_intent": "普票 购方张三 停车费200元",
+    "expected_command": "dws finance invoice issue",
+    "expected_flags": {
+      "--invoice-type": "9",
+      "--purchaser": "张三",
+      "--products": "[{\"productName\":\"停车服务费\",\"amountIncludeTax\":\"200.00\",\"taxSign\":\"1\",\"quantity\":\"1\"}]"
+    },
+    "difficulty": "easy",
+    "note": "普票+个人+已有标准名 → 直接开票；--taxnum 可省略"
+  },
+  {
+    "test_id": "issue_direct_happy_003",
+    "dimension": "happy_path",
+    "user_intent": "给阿里巴巴（中国）网络技术有限公司开专票 税号91330100717440066A 会议服务费 3000",
+    "expected_command": "dws finance invoice issue",
+    "expected_flags": {
+      "--invoice-type": "8",
+      "--purchaser": "阿里巴巴（中国）网络技术有限公司",
+      "--taxnum": "91330100717440066A",
+      "--products": "[{\"productName\":\"会议服务费\",\"amountIncludeTax\":\"3000.00\",\"taxSign\":\"1\",\"quantity\":\"1\"}]"
+    },
+    "difficulty": "easy",
+    "note": "购方全称含括号，税号含字母 → 原样传入"
+  },
+  {
+    "test_id": "issue_direct_colloquial_001",
+    "dimension": "colloquial",
+    "user_intent": "开个专票给美团 税号91110105MA01MBW537 人力资源服务 8000块",
+    "expected_command": "dws finance invoice issue",
+    "expected_flags": {
+      "--invoice-type": "8",
+      "--purchaser": "美团",
+      "--taxnum": "91110105MA01MBW537",
+      "--products": "[{\"productName\":\"人力资源服务\",\"amountIncludeTax\":\"8000.00\",\"taxSign\":\"1\",\"quantity\":\"1\"}]"
+    },
+    "difficulty": "medium",
+    "note": "口语化表述 + 已给税号 + 标准商品名 → 直接开票"
+  },
+  {
+    "test_id": "issue_direct_colloquial_002",
+    "dimension": "colloquial",
+    "user_intent": "帮我给字节跳动开张普票 税号91110108551385607B 技术开发服务 两万块",
+    "expected_command": "dws finance invoice issue",
+    "expected_flags": {
+      "--invoice-type": "9",
+      "--purchaser": "字节跳动",
+      "--taxnum": "91110108551385607B",
+      "--products": "[{\"productName\":\"技术开发服务\",\"amountIncludeTax\":\"20000.00\",\"taxSign\":\"1\",\"quantity\":\"1\"}]"
+    },
+    "difficulty": "medium",
+    "note": "金额用中文'两万'→ 转换为 20000.00"
+  },
+  {
+    "test_id": "issue_direct_colloquial_003",
+    "dimension": "colloquial",
+    "user_intent": "那就开专票给滴滴出行 税号91110108MA01F3XH27 信息系统服务费一千五",
+    "expected_command": "dws finance invoice issue",
+    "expected_flags": {
+      "--invoice-type": "8",
+      "--purchaser": "滴滴出行",
+      "--taxnum": "91110108MA01F3XH27",
+      "--products": "[{\"productName\":\"信息系统服务费\",\"amountIncludeTax\":\"1500.00\",\"taxSign\":\"1\",\"quantity\":\"1\"}]"
+    },
+    "difficulty": "medium",
+    "note": "金额'一千五'→ 1500.00；有税号 → 直接开票"
+  },
+  {
+    "test_id": "issue_direct_param_001",
+    "dimension": "param_conversion",
+    "user_intent": "专票 抬头北京美团科技有限公司 税号914403001234567890 软件服务费 100元含税 2件",
+    "expected_command": "dws finance invoice issue",
+    "expected_flags": {
+      "--invoice-type": "8",
+      "--purchaser": "北京美团科技有限公司",
+      "--taxnum": "914403001234567890",
+      "--products": "[{\"productName\":\"软件服务费\",\"amountIncludeTax\":\"100.00\",\"taxSign\":\"1\",\"quantity\":\"2\"}]"
+    },
+    "difficulty": "medium",
+    "note": "用户指定数量2件 → quantity='2'；含税明确 → taxSign='1'"
+  },
+  {
+    "test_id": "issue_direct_param_002",
+    "dimension": "param_conversion",
+    "user_intent": "给腾讯开普票 税号914403001922038216 广告服务 5000不含税",
+    "expected_command": "dws finance invoice issue",
+    "expected_flags": {
+      "--invoice-type": "9",
+      "--purchaser": "腾讯",
+      "--taxnum": "914403001922038216",
+      "--products": "[{\"productName\":\"广告服务\",\"amountIncludeTax\":\"5000.00\",\"taxSign\":\"1\"}]"
+    },
+    "difficulty": "medium",
+    "note": "用户说不含税 但按 NEVER DO 规则 taxSign 仍固定传 '1'，金额原值填入"
+  },
+  {
+    "test_id": "issue_direct_param_003",
+    "dimension": "param_conversion",
+    "user_intent": "专票 北京字节跳动科技有限公司 税号91110108551385607B 数据处理服务 金额12345.67",
+    "expected_command": "dws finance invoice issue",
+    "expected_flags": {
+      "--invoice-type": "8",
+      "--purchaser": "北京字节跳动科技有限公司",
+      "--taxnum": "91110108551385607B",
+      "--products": "[{\"productName\":\"数据处理服务\",\"amountIncludeTax\":\"12345.67\",\"taxSign\":\"1\",\"quantity\":\"1\"}]"
+    },
+    "difficulty": "medium",
+    "note": "小数金额原值传入，不四舍五入"
+  },
+  {
+    "test_id": "issue_direct_boundary_001",
+    "dimension": "boundary",
+    "user_intent": "专票 购方上海XX科技有限公司 税号91310000MA1G5BXE3E 信息系统服务费 0.01元",
+    "expected_command": "dws finance invoice issue",
+    "expected_flags": {
+      "--invoice-type": "8",
+      "--purchaser": "上海XX科技有限公司",
+      "--taxnum": "91310000MA1G5BXE3E",
+      "--products": "[{\"productName\":\"信息系统服务费\",\"amountIncludeTax\":\"0.01\",\"taxSign\":\"1\",\"quantity\":\"1\"}]"
+    },
+    "difficulty": "hard",
+    "note": "最小金额边界 0.01 → 直接传入字符串 '0.01'"
+  },
+  {
+    "test_id": "issue_direct_boundary_002",
+    "dimension": "boundary",
+    "user_intent": "专票 北京滴滴出行科技有限公司 税号91110108MA01F3XH27 软件产品-系统集成服务 300 服务产品-技术支持服务 200",
+    "expected_command": "dws finance invoice issue",
+    "expected_flags": {
+      "--invoice-type": "8",
+      "--purchaser": "北京滴滴出行科技有限公司",
+      "--taxnum": "91110108MA01F3XH27",
+      "--products": "[{\"productName\":\"系统集成服务\",\"amountIncludeTax\":\"300.00\",\"taxSign\":\"1\",\"quantity\":\"1\"},{\"productName\":\"技术支持服务\",\"amountIncludeTax\":\"200.00\",\"taxSign\":\"1\",\"quantity\":\"1\"}]"
+    },
+    "difficulty": "hard",
+    "note": "多商品明细 → --products JSON 数组含2条，taxSign 每条均为 '1'"
+  },
+  {
+    "test_id": "issue_direct_robustness_001",
+    "dimension": "robustness",
+    "user_intent": "专票 购方美团 税号91110105MA01MBW537 信息费 100",
+    "expected_command": "__ask_user__",
+    "difficulty": "hard",
+    "note": "'信息费'是口语，虽有税号 → 必须先向用户确认标准名称（如'信息系统服务费'），不得直接调用 dws finance invoice issue"
+  },
+  {
+    "test_id": "issue_direct_robustness_002",
+    "dimension": "robustness",
+    "user_intent": "专票 税号91110108MA01F3XH27 技术服务费 500",
+    "expected_command": "__ask_user__",
+    "difficulty": "hard",
+    "note": "有税号无购方全称 → 必须先向用户索要购方全称（抬头），不得只凭税号开票"
+  },
+  {
+    "test_id": "issue_direct_confusion_001",
+    "dimension": "tool_confusion",
+    "user_intent": "上次那张有问题 重新给字节跳动开专票 税号91110108551385607B 软件服务费2000",
+    "expected_command": "dws finance invoice issue",
+    "expected_flags": {
+      "--invoice-type": "8",
+      "--purchaser": "字节跳动",
+      "--taxnum": "91110108551385607B",
+      "--products": "[{\"productName\":\"软件服务费\",\"amountIncludeTax\":\"2000.00\",\"taxSign\":\"1\",\"quantity\":\"1\"}]"
+    },
+    "difficulty": "hard",
+    "note": "虽然上下文有旧 orderId，但这是新开票请求 → 调用 dws finance invoice issue，不走 issue-result"
+  },
+  {
+    "test_id": "issue_direct_confusion_002",
+    "dimension": "tool_confusion",
+    "user_intent": "普票 购方李四 税号91110108000000000X 物业管理费 600 好的帮我提交",
+    "expected_command": "dws finance invoice issue",
+    "expected_flags": {
+      "--invoice-type": "9",
+      "--purchaser": "李四",
+      "--taxnum": "91110108000000000X",
+      "--products": "[{\"productName\":\"物业管理费\",\"amountIncludeTax\":\"600.00\",\"taxSign\":\"1\",\"quantity\":\"1\"}]"
+    },
+    "difficulty": "medium",
+    "note": "用户主动说'帮我提交' → 确认调用 dws finance invoice issue；普票也可传税号（选填）"
+  },
+  {
+    "test_id": "query_extra_001",
+    "dimension": "tool_confusion",
+    "user_intent": "发票号码 25110000000123456789 这张票开好了吗",
+    "expected_command": "dws finance invoice issue-result",
+    "difficulty": "hard",
+    "note": "用户提供发票号码而非 orderId；查询状态走 issue-result，从上下文取 orderId；无 orderId 则问用户"
+  },
+  {
+    "test_id": "query_extra_002",
+    "dimension": "robustness",
+    "user_intent": "上次给腾讯开的票结果怎么样了 你再查一下",
+    "expected_command": "dws finance invoice issue-result",
+    "difficulty": "medium",
+    "note": "描述是'上次给腾讯开的票'而非 orderId → 从上下文提取最近的 orderId；多次轮询场景",
+    "context": "orderId=ORD20260314001"
+  },
+  {
+    "test_id": "fuzzy_query_001",
+    "dimension": "happy_path",
+    "user_intent": "给钉钉中国开专票 信息系统服务费 500块",
+    "expected_command": "dws finance customer list",
+    "expected_flags": {
+      "--keyword": "钉钉中国",
+      "--page-size": "10",
+      "--page-index": "1"
+    },
+    "difficulty": "easy",
+    "note": "Round 1 用原始输入'钉钉中国'；若无结果继续 Round 2 尝试'钉钉（中国）'/'钉钉(中国)'，Round 3 尝试'钉钉'"
+  },
+  {
+    "test_id": "fuzzy_query_002",
+    "dimension": "robustness",
+    "user_intent": "给钉钉中国开专票 信息系统服务费 500块",
+    "expected_command": "dws finance customer list",
+    "expected_flags": {
+      "--keyword": "钉钉（中国）",
+      "--page-size": "10",
+      "--page-index": "1"
+    },
+    "difficulty": "medium",
+    "context": "Round 1 --keyword='钉钉中国' 返回空结果",
+    "note": "Round 1 无结果后 → Round 2 尝试全角括号变体'钉钉（中国）'"
+  },
+  {
+    "test_id": "fuzzy_query_003",
+    "dimension": "robustness",
+    "user_intent": "给钉钉中国开专票 信息系统服务费 500块",
+    "expected_command": "dws finance customer list",
+    "expected_flags": {
+      "--keyword": "钉钉",
+      "--page-size": "10",
+      "--page-index": "1"
+    },
+    "difficulty": "hard",
+    "context": "Round 1 --keyword='钉钉中国' 空；Round 2 --keyword='钉钉（中国）'和'钉钉(中国)'均返回空",
+    "note": "Round 1+2 全部无结果 → Round 3 取核心词'钉钉'（去掉末尾地区词'中国'）"
+  },
+  {
+    "test_id": "fuzzy_query_004",
+    "dimension": "boundary",
+    "user_intent": "给微软（中国）有限公司开专票 技术支持服务 3000",
+    "expected_command": "dws finance customer list",
+    "expected_flags": {
+      "--keyword": "微软（中国）有限公司",
+      "--page-size": "10",
+      "--page-index": "1"
+    },
+    "difficulty": "easy",
+    "note": "输入本身含全角括号 → Round 1 直接用原始输入；无需生成括号变体（已含括号）"
+  },
+  {
+    "test_id": "fuzzy_query_005",
+    "dimension": "boundary",
+    "user_intent": "给微软（中国）有限公司开专票 技术支持服务 3000",
+    "expected_command": "dws finance customer list",
+    "expected_flags": {
+      "--keyword": "微软",
+      "--page-size": "10",
+      "--page-index": "1"
+    },
+    "difficulty": "hard",
+    "context": "Round 1 --keyword='微软（中国）有限公司' 返回空结果",
+    "note": "Round 1 无结果 → 跳 Round 2（原始已有括号）→ Round 3 取核心词'微软'（去括号及内容、去有限公司）"
+  },
+  {
+    "test_id": "fuzzy_query_006",
+    "dimension": "boundary",
+    "user_intent": "给北京滴滴出行科技有限公司开专票 平台服务费 1000",
+    "expected_command": "dws finance customer list",
+    "expected_flags": {
+      "--keyword": "北京滴滴出行科技有限公司",
+      "--page-size": "10",
+      "--page-index": "1"
+    },
+    "difficulty": "easy",
+    "note": "已提供完整公司名含地区词 → Round 1 先用原始全名查询；地区词'北京'不会被提前剥离"
+  },
+  {
+    "test_id": "fuzzy_query_007",
+    "dimension": "robustness",
+    "user_intent": "给上海腾讯开普票 广告服务 800",
+    "expected_command": "dws finance customer list",
+    "expected_flags": {
+      "--keyword": "上海腾讯",
+      "--page-size": "10",
+      "--page-index": "1"
+    },
+    "difficulty": "medium",
+    "note": "Round 1 用'上海腾讯'；若无结果 Round 2 尝试'腾讯（上海）'和'腾讯(上海)'；Round 3 取核心词'腾讯'"
+  },
+  {
+    "test_id": "fuzzy_query_008",
+    "dimension": "negative",
+    "user_intent": "给钉钉中国开专票 信息系统服务费 500块",
+    "expected_command": "__ask_user__",
+    "difficulty": "hard",
+    "context": "Round 1 --keyword='钉钉中国' 空；Round 2 --keyword='钉钉（中国）'/'钉钉(中国)' 空；Round 3 --keyword='钉钉' 空",
+    "note": "三轮查询全部无结果 → 进入 Phase 2，向用户一次性索要购方全称和税号"
+  }
+]
