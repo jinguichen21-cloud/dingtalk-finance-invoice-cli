@@ -1,0 +1,13 @@
+{
+  "name": "dingtalk-finance-invoice-cli",
+  "version": "1.0.0",
+  "description": "向客户开具钉钉数电发票（专票/普票），并查询开票进度和结果",
+  "skill_type": "Skill-CLI",
+  "product": "智能财务·开具发票",
+  "cli_tool": "dws",
+  "cli_commands": [
+    "dws finance customer list",
+    "dws finance invoice issue",
+    "dws finance invoice issue-result"
+  ]
+}
